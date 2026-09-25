@@ -331,7 +331,7 @@ def create_order():
 
 def run_database_backup():
     if not os.path.exists('backups'):
-        os.makedirs('backups')
+        os.makedirs('backups', exist_ok=True)
         
     timestamp = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
     backup_filename = f"backups/tailor_shop_backup_{timestamp}.db"
