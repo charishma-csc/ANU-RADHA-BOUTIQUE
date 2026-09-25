@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>New Order - Mom's Tailoring Shop</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+</head>
+<body>
+
+<div class="container my-4" style="max-width: 600px;">
+    <h2 class="mb-4 text-center">➕ కొత్త ఆర్డర్ (New Order)</h2>
+
+    <form id="orderForm" action="/api/orders/create" method="POST" enctype="multipart/form-data">
+        
+        <!-- SECTION 1: Customer & Measurements -->
+        <div class="customer-section border p-3 rounded mb-3 bg-light">
+            <h4>👤 కస్టమర్ & కొలతలు (Customer Details)</h4>
+            
+            <div class="mb-3">
+                <label for="customerSelect" class="form-label fw-bold">కస్టమర్ పేరు (Customer Name)</label>
+                <select id="customerSelect" name="customer_name" class="form-select form-select-lg" onchange="onCustomerSelect(this.value)" required>
+                    <option value="">కస్టమర్‌ను ఎంచుకోండి (Select Customer)</option>
+                    {% for c in customers %}
+                        <option value="{{ c['customer_name'] }}">{{ c['customer_name'] }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <!-- Measurements Input Grid -->
+            <div class="row g-2">
+                <div class="col-6">
+                    <label class="form-label">పొడవు (Length)</label>
+                    <input type="text" id="length" name="length" class="form-control">
+                </div>
+                <div class="col-6">
+                    <label class="form-label">వెడల్పు / బాడీ (Width)</label>
+                    <input type="text" id="width" name="width" class="form-control">
+                </div>
+                <div class="col-6">
+                    <label class="form-label">వీపు మెడ (Back Neck)</label>
+                    <input type="text" id="back_neck" name="back_neck" class="form-control">
+                </div>
+                <div class="col-6">
+                    <label class="form-label">చేతి పొడవు (Hand Height)</label>
+                    <input type="text" id="hand_height" name="hand_height" class="form-control">
+                </div>
+                <div class="col-12">
+                    <label class="form-label">ముందు మెడ (Front Neck)</label>
+                    <input type="text" id="front_neck" name="front_neck" class="form-control">
+                </div>
+            </div>
+
+            <!-- Hemming Details Section -->
+            <div class="row g-2 mt-3 pt-3 border-top">
+                <div class="col-6">
+                    <label class="form-label fw-bold">హెమ్మింగ్ కావాలా? (Hemming?)</label>
+                    <select name="hemming_required" class="form-select">
+                        <option value="Yes">అవును (Yes)</option>
+                        <option value="No" selected>వద్దు (No)</option>
+                    </select>
+                </div>
+                <div class="col-6">
+                    <label class="form-label fw-bold">హెమ్మింగ్ వర్కర్ (Hemming Worker)</label>
+                    <input type="text" name="hemming_worker" class="form-control" placeholder="ఉదా: లక్ష్మి">
+                </div>
+            </div>
+        </div>
+
+        <!-- SECTION 2: Previous Order History Photos -->
+        <div class="previous-orders-section border p-3 rounded mb-3 bg-light">
+            <h5>📸 గతంలో కుట్టిన డిజైన్లు (Previous Delivered Blouses)</h5>
+            <div id="previousOrdersGallery" class="d-flex flex-wrap gap-2 mt-2">
+                <p class="text-muted small">కస్టమర్‌ను ఎంచుకోండి (Select a customer to view past photos)</p>
+            </div>
+        </div>
+
+        <!-- SECTION 3: Photo Uploads -->
+        <div class="photo-upload-section border p-3 rounded mb-3 bg-light">
+            <h4>📷 కొత్త ఫోటోలు (Order Photos)</h4>
+            <div class="mb-2">
+                <label class="form-label">క్లాత్ ఫోటో (Cloth Photo)</label>
+                <input type="file" name="cloth_photo" class="form-control" accept="image/*">
+            </div>
+            <div>
+                <label class="form-label">డిజైన్ నమూనా (Reference Design)</label>
+                <input type="file" name="design_photo" class="form-control" accept="image/*">
+            </div>
+        </div>
+
+        <!-- SECTION 4: Material Availability Check -->
+        <div class="material-check-section border p-3 rounded mb-3 bg-light">
+            <h4>🧵 అవసరమైన మెటీరియల్స్ (Required Materials)</h4>
+            
+            <div id="materialList">
+                <div class="row g-2 mb-2 material-row">
+                    <div class="col-6">
+                        <select name="material_id" class="form-select stock-select" onchange="checkStock(this)">
+                            <option value="">మెటీరియల్ ఎంచుకోండి (Select Item)</option>
+                            {% for item in stock_items %}
+                                <option value="{{ item['id'] }}" data-stock="{{ item['quantity'] }}">
+                                    {{ item['item_name'] }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-3">
+                        <input type="number" name="material_qty" class="form-control qty-input" value="1" min="1" placeholder="Qty" onchange="validateRow(this)">
+                    </div>
+                    <div class="col-3 d-flex align-items-center">
+                        <span class="stock-status badge bg-secondary">ఎంచుకోండి</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SECTION 5: Dual Choice Action Submit Buttons -->
+        <div class="measurement-save-options d-flex gap-2 mt-4">
+            <button type="submit" name="save_mode" value="order_only" class="btn btn-secondary flex-fill py-3 fw-bold">
+                📝 Only For This Order<br><small>(ఈ ఆర్డర్ కు మాత్రమే)</small>
+            </button>
+            <button type="submit" name="save_mode" value="update_profile" class="btn btn-primary flex-fill py-3 fw-bold">
+                💾 Save as New Default<br><small>(ఖాతాలో అప్‌డేట్ చేయి)</small>
+            </button>
+        </div>
+
+    </form>
+</div>
+
+<!-- JavaScript Logic -->
+<script>
+// Auto-load measurements and previous photos on selecting customer
+async function onCustomerSelect(customerName) {
+    if (!customerName) return;
+
+    // Load Measurements
+    const res = await fetch(`/api/customers/measurements?name=${encodeURIComponent(customerName)}`);
+    const data = await res.json();
+
+    if (data.success && data.measurements) {
+        document.getElementById('length').value = data.measurements.length || '';
+        document.getElementById('width').value = data.measurements.width || '';
+        document.getElementById('back_neck').value = data.measurements.back_neck || '';
+        document.getElementById('hand_height').value = data.measurements.hand_height || '';
+        document.getElementById('front_neck').value = data.measurements.front_neck || '';
+    }
+
+    // Load History Photos
+    loadCustomerHistoryPhotos(customerName);
+}
+
+// Fetch Delivered Photos History
+async function loadCustomerHistoryPhotos(customerName) {
+    const res = await fetch(`/api/orders/history-photos?customer=${encodeURIComponent(customerName)}`);
+    const history = await res.json();
+    
+    const galleryContainer = document.getElementById('previousOrdersGallery');
+    galleryContainer.innerHTML = '';
+    
+    if (history.photos && history.photos.length > 0) {
+        history.photos.forEach(item => {
+            if (item.delivered_photo) {
+                const img = document.createElement('img');
+                img.src = item.delivered_photo;
+                img.className = 'history-thumbnail img-thumbnail m-1';
+                img.style.width = '90px';
+                img.style.height = '90px';
+                img.style.objectFit = 'cover';
+                galleryContainer.appendChild(img);
+            }
+        });
+    } else {
+        galleryContainer.innerHTML = '<p class="text-muted small">పాత ఫోటోలు లేవు (No previous photos found)</p>';
+    }
+}
+
+// Check Material Inventory Stock Status
+function checkStock(selectElement) {
+    const selectedOption = selectElement.options[selectElement.selectedIndex];
+    const availableStock = parseInt(selectedOption.getAttribute('data-stock') || 0);
+    const row = selectElement.closest('.material-row');
+    const qtyInput = row.querySelector('.qty-input');
+    const statusBadge = row.querySelector('.stock-status');
+    const requiredQty = parseInt(qtyInput.value) || 1;
+
+    if (!selectElement.value) {
+        statusBadge.className = 'badge bg-secondary';
+        statusBadge.innerText = 'ఎంచుకోండి';
+        return;
+    }
+
+    if (availableStock >= requiredQty) {
+        statusBadge.className = 'badge bg-success';
+        statusBadge.innerText = `✅ ఉంది (${availableStock})`;
+    } else {
+        statusBadge.className = 'badge bg-danger';
+        statusBadge.innerText = `❌ నిల్వ లేదు (${availableStock})`;
+    }
+}
+
+function validateRow(inputElement) {
+    const row = inputElement.closest('.material-row');
+    const selectElement = row.querySelector('.stock-select');
+    checkStock(selectElement);
+}
+</script>
+
+</body>
+</html>

@@ -1,0 +1,80 @@
+<form id="orderForm" action="/api/orders/create" method="POST" enctype="multipart/form-data">
+    
+    <!-- 1. Customer Details & Measurements -->
+    <div class="customer-section border p-3 rounded mb-3">
+        <h4>👤 Customer Details & Measurements</h4>
+        <div class="mb-3">
+            <label for="customerSelect" class="form-label">Customer Name:</label>
+            <select id="customerSelect" name="customer_name" class="form-select" onchange="onCustomerSelect(this.value)">
+                <option value="">Select Customer</option>
+                <option value="Chittakka Chanti">Chittakka Chanti</option>
+                <option value="Madhavi Garu">Madhavi Garu</option>
+            </select>
+        </div>
+
+        <div class="row g-2">
+            <div class="col-6 col-md-4">
+                <label class="form-label">Length</label>
+                <input type="text" id="length" name="length" class="form-control">
+            </div>
+            <div class="col-6 col-md-4">
+                <label class="form-label">Width</label>
+                <input type="text" id="width" name="width" class="form-control">
+            </div>
+            <div class="col-6 col-md-4">
+                <label class="form-label">Back Neck</label>
+                <input type="text" id="back_neck" name="back_neck" class="form-control">
+            </div>
+            <div class="col-6 col-md-4">
+                <label class="form-label">Hand Height</label>
+                <input type="text" id="hand_height" name="hand_height" class="form-control">
+            </div>
+            <div class="col-6 col-md-4">
+                <label class="form-label">Front Neck</label>
+                <input type="text" id="front_neck" name="front_neck" class="form-control">
+            </div>
+        </div>
+    </div>
+
+    <!-- 2. Photo Upload Section -->
+    <div class="photo-upload-section border p-3 rounded mb-3">
+        <h4>📸 Cloth & Design Photos</h4>
+        <input type="file" name="cloth_photo" class="form-control mb-2" accept="image/*">
+        <input type="file" name="design_photo" class="form-control" accept="image/*">
+    </div>
+
+    <!-- 3. Material Check Section -->
+    <div class="material-check-section border p-3 rounded mb-3">
+        <h4>🧵 Required Materials</h4>
+        <div id="materialList">
+            <div class="row g-2 mb-2 material-row">
+                <div class="col-6">
+                    <select class="form-select stock-select" onchange="checkStock(this)">
+                        <option value="">Select Item</option>
+                        <option value="1" data-stock="100">Blouse Hooks (A-1 Grade)</option>
+                        <option value="2" data-stock="50">Keshar Sewing Thread</option>
+                        <option value="3" data-stock="20">2x2 Rubia Lining</option>
+                        <option value="4" data-stock="0">Meghana Saree Falls</option>
+                    </select>
+                </div>
+                <div class="col-3">
+                    <input type="number" class="form-control qty-input" value="1" min="1" placeholder="Qty" onchange="validateRow(this)">
+                </div>
+                <div class="col-3 d-flex align-items-center">
+                    <span class="stock-status badge bg-secondary">Select</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 4. YOUR CHOICE BUTTONS (These submit the form) -->
+    <div class="measurement-save-options d-flex gap-2 mt-4">
+        <button type="submit" name="save_mode" value="order_only" class="btn btn-secondary flex-fill py-3 fw-bold">
+            📝 Only For This Order<br><small>(ఈ ఆర్డర్ కు మాత్రమే)</small>
+        </button>
+        <button type="submit" name="save_mode" value="update_profile" class="btn btn-primary flex-fill py-3 fw-bold">
+            💾 Save as New Default<br><small>(ఖాతాలో అప్‌డేట్ చేయి)</small>
+        </button>
+    </div>
+
+</form>
